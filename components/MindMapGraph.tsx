@@ -53,7 +53,10 @@ const MindMapGraph: React.FC<MindMapGraphProps> = ({ data, onNodeClick }) => {
     
     // Tree Layout
     const treeLayout = d3.tree<MindMapNode>().size([innerHeight, innerWidth]);
-    treeLayout(root);
+    
+    // Apply layout and explicitly cast the result to HierarchyPointNode
+    // This tells TypeScript that x and y coordinates are now definitely present
+    const rootNode = treeLayout(root) as d3.HierarchyPointNode<MindMapNode>;
 
     // Zoom behavior
     const g = svg.append("g")
@@ -78,7 +81,7 @@ const MindMapGraph: React.FC<MindMapGraphProps> = ({ data, onNodeClick }) => {
 
     // Links
     g.selectAll(".link")
-      .data(root.links())
+      .data(rootNode.links())
       .enter()
       .append("path")
       .attr("class", "link")
@@ -92,13 +95,13 @@ const MindMapGraph: React.FC<MindMapGraphProps> = ({ data, onNodeClick }) => {
 
     // Nodes
     const node = g.selectAll(".node")
-      .data(root.descendants())
+      .data(rootNode.descendants())
       .enter()
       .append("g")
       .attr("class", d => `node ${d.children ? "node--internal" : "node--leaf"}`)
       .attr("transform", d => `translate(${d.y},${d.x})`)
       .style("cursor", "pointer")
-      .on("click", (event, d) => {
+      .on("click", (_, d) => { // Using _ to ignore event parameter
           onNodeClick(d.data.name);
       })
       .on("mouseover", function() {
@@ -106,7 +109,8 @@ const MindMapGraph: React.FC<MindMapGraphProps> = ({ data, onNodeClick }) => {
           d3.select(this).select("text").style("font-weight", "bold");
       })
       .on("mouseout", function() {
-          d3.select(this).select("circle").attr("stroke", d => d3.select(this).classed("highlighted") ? "#ef4444" : "#94a3b8").attr("stroke-width", 2);
+          // Using () => to ignore d parameter
+          d3.select(this).select("circle").attr("stroke", () => d3.select(this).classed("highlighted") ? "#ef4444" : "#94a3b8").attr("stroke-width", 2);
           d3.select(this).select("text").style("font-weight", "normal");
       });
 
