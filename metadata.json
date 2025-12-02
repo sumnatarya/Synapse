@@ -1,0 +1,5 @@
+{
+  "name": "Synapse Study Companion",
+  "description": "An intelligent study aid that transforms syllabus documents into concise study guides and interactive conceptual mind maps using Gemini AI.",
+  "requestFramePermissions": []
+}
